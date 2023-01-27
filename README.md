@@ -1,1 +1,3 @@
-# playground-rei
+# Playground for Rei
+
+Notebooks and scripts.
