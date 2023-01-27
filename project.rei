@@ -1,6 +1,6 @@
-name = "$name"
-author = "$author"
-description = "$description"
-license = "$license"
+name = ""
+author = ""
+description = ""
+license = ""
 
-rei = "$version"
+rei = ""
