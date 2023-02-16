@@ -82,3 +82,89 @@ get_glyph: (ident: Ident) => glyphs[ident] ?: glyphs.generate(ident)
 // what about () parens? and => and certain things like ?:
 // I guess you can tokenise and convert them into a single glyph that represents it to keep the logic
 // (params) can also be kept but shrunk, : can be kept
+
+/*
+    VC Parser
+*/
+
+// HERE, all whitespaces including newlines, tabs, spaces, carriages are ignored
+// each time a parser is called, we ignore the next set of ws
+
+// basically calls trim_next_ws
+// which skips to the next non ws CHAR!!!!!
+
+Token: enum {
+    Ident
+    Literal
+}
+
+alphanumeric: (input: String) -> Parser => choice(letter, digit)
+
+parse_ident: (input: String) -> Parser {
+    letter(input).zero_or_more(alphanumeric)
+}
+
+parse_ident: (input: String) -> Parser {
+    letter(input).then(alphanumeric.zero_or_more())
+}
+
+parse_ident: (input: String) -> Parser {
+    letter(input).then(alphanumeric).zero_or_more()
+}
+
+// how do you know what the behavior of then and or is?
+// then should die / everything should return before that
+// or only works if prev is Some
+// so it should be Fn[String, Parser[Res])]
+// and dont implement Parser[None] for or?, yea just return None
+
+// 1. choice() -> Parser[None]
+
+Parser: {
+    choice: (Fn[String, Parser]) -> Parser => _
+    zero_or_more: (Fn[String, Parser]) -> Parser => _
+
+    then: (Fn[String, Parser]) -> Parser => _
+    or: (Fn[String, Parser]) -> Parser => _
+}
+
+Parser[r: Res]: {
+    choice[r: Res]: (Fn[String, Parser]) -> Parser => _
+    zero_or_more[r: Res]: (Fn[String, Parser]) -> Parser => _
+
+    then[r: Res]: (Fn[String, Parser]) -> Parser => _
+    or[r: Res]: (f: Fn[String, Parser]) -> Parser => match r {
+        Ok => Self()
+        None => f
+        Error => error()
+    }
+}
+
+// so early return is a thing on my end I guess
+// we either have a dependent type or a type parameter and a param of that lOL!
+// then we can use that as a match
+// or something idk
+
+// Parser: ()
+Parser: Fn[String, Self]
+
+// how do we call .zero_or_more()?
+
+
+// its (String) -> Parser
+// to be able to "chain"
+// maybe return a Fn??
+// uhh
+
+// so then should be implicit. But or shouldnt
+
+/*
+* -> zero_or_more
++ -> one_or_more
+? -> maybe
+[] (|) -> choice
+*/
+
+// should input be at the first or last? should it even exist
+
+Fn[T, R]: trait(T) -> R
