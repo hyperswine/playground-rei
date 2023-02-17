@@ -101,15 +101,7 @@ Token: enum {
 alphanumeric: (input: String) -> Parser => choice(letter, digit)
 
 parse_ident: (input: String) -> Parser {
-    letter(input).zero_or_more(alphanumeric)
-}
-
-parse_ident: (input: String) -> Parser {
-    letter(input).then(alphanumeric.zero_or_more())
-}
-
-parse_ident: (input: String) -> Parser {
-    letter(input).then(alphanumeric).zero_or_more()
+    letter(input).then(zero_or_more(alphanumeric))
 }
 
 // how do you know what the behavior of then and or is?
@@ -120,12 +112,25 @@ parse_ident: (input: String) -> Parser {
 
 // 1. choice() -> Parser[None]
 
+ParserRes: Parser | Error
+
+ParserRes: impl Parse {
+    choice: (self, parsers: Fn[String, Parser]...) -> ParserRes {
+        parsers.find(p => p())
+    }
+}
+
+// then().then().is().or()
+// choice(is())
+
 Parser: {
     choice: (Fn[String, Parser]) -> Parser => _
     zero_or_more: (Fn[String, Parser]) -> Parser => _
 
     then: (Fn[String, Parser]) -> Parser => _
-    or: (Fn[String, Parser]) -> Parser => _
+    choice: (parsers: Fn[String, Parser]...) -> Parser {
+        parsers.find(p => p())
+    }
 }
 
 Parser[r: Res]: {
@@ -133,7 +138,7 @@ Parser[r: Res]: {
     zero_or_more[r: Res]: (Fn[String, Parser]) -> Parser => _
 
     then[r: Res]: (Fn[String, Parser]) -> Parser => _
-    or[r: Res]: (f: Fn[String, Parser]) -> Parser => match r {
+    choice[r: Res]: (parsers: Fn[String, Parser]...) -> Parser => match r {
         Ok => Self()
         None => f
         Error => error()
