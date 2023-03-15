@@ -242,6 +242,8 @@ eval: (node_list: _, expr: _) -> Int {
     }
 }
 
+exprs: () -> Parser[[Symbol]] => expr().repeated()
+
 expr: () -> Parser[Symbol] {
     fn_def().or(call).or(ident).or(integer)
 }
@@ -265,3 +267,16 @@ call: () => ident
 Parser: {
     parse: (self, String) => _
 }
+
+lower: (Symbol) -> Node => match {
+    Fn (name, params, rhs) => Node::Compute(name, ?)
+    Call (name, args) => ?
+    // so one of the things was if it matches, then link, or else find
+    Ident (name) => Node::Data(resolve_ident(name))
+    Integer (int) => Node::Data(int)
+}
+
+resolve_ident: (String) -> Integer => symbols.first(symbol => match {
+    Ident (i) => true
+    _ => false
+})
