@@ -285,16 +285,17 @@ resolve_ident: (String) -> Integer => symbols.first(symbol => match {
 
 SymbolList: [(String, Symbol)]
 
-create_node: (symbol: Symbol, symbol_list: SymbolList) -> Node {
+create_node: (symbol: Symbol, symbol_list: SymbolList, call_args: [Symbol]?) -> Node {
     match symbol {
         Call (fn_name, args) => {
-            // let fn_def: Fn = symbol_list.find_symbol(fn_name)
-            let arg_nodes = args.map(arg => create_node(arg, symbol_list))
-            Node::Compute(fn_name, arg_nodes)
+            let fn_def: Fn = symbol_list.find_symbol(fn_name)
+            Node::Compute(fn_name, create_node(fn_def, symbol_list, call_args))
         }
         Fn (fn_name, params, rhs) => {
-            // not really fully lowered, but "good enough"
-            Node::Fn(fn_name, params, rhs)
+            let lowered_rhs = create_node(rhs, symbol_list)
+            // implement me, if call_args is not empty, use it instead of params
+
+            Node::Compute(fn_name, params.map(param => create_node(param, symbol_list)).append(lowered_rhs))
         }
         Ident (name) => create_node(symbol_list.find_symbol(name), symbol_list)
         Integer (int) => Node::Data(int)
@@ -304,7 +305,6 @@ create_node: (symbol: Symbol, symbol_list: SymbolList) -> Node {
 Node: enum {
     Data: Int
     Compute: (String, Vec<Node>)
-    Fn: (String, Vec<String>, Symbol)
 }
 
 NodeList: [(String, Node)]
@@ -315,26 +315,22 @@ NodeList: extend {
     }
 }
 
-execute: (node: Node, node_list: NodeList) -> Node {
+Env: {
+    symbol_list: SymbolList,
+    node_list: NodeList
+}
+
+execute: (node: Node, env: Env) -> Node {
     match node {
         Compute (fn_name, args) => {
-            let fn_node = node_list.find_node(fn_name)
+            let fn_node = env.node_list.find_node(fn_name)
             match fn_node {
-                Fn (_, params, rhs) => match args.len() == params.len() {
-                    // fully applied at current call stack
-                    true => {
-                        // maybe pass the symbol list into execute fn instead                       
-                        // let symbol_list = SymbolList::from_nodes(params, args)
-                        let lowered_rhs = create_node(rhs, symbol_list)
-                        execute(lowered_rhs, node_list)
-                    }
-                    // partially applied
-                    false => Node::Compute(fn_name, args)
+                Compute (fn_name, params_and_rhs) => {
+                    // implement me
                 }
                 _ => panic("Function name not found.")
             }
         }
         Data (data) => Node::Data(data)
-        _ => panic("Cannot execute Fn node directly.")
     }
 }
