@@ -173,3 +173,42 @@ Parser: Fn[String, Self]
 // should input be at the first or last? should it even exist
 
 Fn[T, R]: trait(T) -> R
+
+/*
+    Lowering
+*/
+
+Rhs: Integer | Ident | Call
+
+Rhs: extend {
+    in: (self, s: String) -> bool {
+        match self {
+            Integer _ => false
+            Ident i => s == i
+            Call (name, args) => {
+                // assume no higher order functions for now
+
+                args.iter(i => s in i)
+            }
+
+        }
+    }
+}
+
+Ident: String
+
+Call: {
+    name: String
+    args: [Rhs]
+}
+
+// name: (params*) => rhs*
+lower_fn_def: (name: String, params: [String], rhs: Rhs) {
+    match rhs {
+        Integer (i) => i,
+        Ident (i) => i,
+        Call (name, args) => {
+            params.filter(p in args)
+        } 
+    }
+}
