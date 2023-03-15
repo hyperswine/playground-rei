@@ -178,6 +178,8 @@ Fn[T, R]: trait(T) -> R
     Lowering
 */
 
+Node: Compute | Data
+
 Rhs: Integer | Ident | Call
 
 Rhs: extend {
@@ -211,10 +213,15 @@ Call: {
 }
 
 // name: (params*) => rhs*
-lower_fn_def: (node_list: _, name: String, params: [String], rhs: Rhs) {
+lower_fn_def: (node_list: _, name: String, params: [String], rhs: Rhs) -> Node {
     match rhs {
-        Integer (i) => i,
-        Ident (i) => i,
+        Integer (i) => Data(i)
+        // assume ident always integer for now
+        // wait this could also be used as the final thing for processing arg though
+        // yea dont find maybe? if name == i, otherwise find
+        Ident (i) => {
+            Data(symbols.find(i))
+        }
         Call (name, args) {
             // params.filter(p in args)
             params.map(p => args.do(p))
@@ -233,4 +240,28 @@ eval: (node_list: _, expr: _) -> Int {
             node_list.find(name).compute(args)
         }
     }
+}
+
+expr: () -> Parser[Symbol] {
+    fn_def().or(call).or(ident).or(integer)
+}
+
+// rhs is also a symbol for fn def
+
+params: () => ident.separated_by(Comma)
+
+fn_def: () => ident
+                .then(Colon)
+                .then(params)
+                .then(call().or(ident).or(integer))
+                .map((name, _params, _rhs) => Symbol::Fn(name, _params, _rhs))
+
+call: () => ident
+                .then(call().or(ident).or(integer))
+                .separated_by(Comma)
+                .delimited_by(LParen, RParen)
+                .map((name, args) => Symbol::Call(name, args))
+
+Parser: {
+    parse: (self, String) => _
 }
