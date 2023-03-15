@@ -292,10 +292,15 @@ create_node: (symbol: Symbol, symbol_list: SymbolList, call_args: [Symbol]?) -> 
             Node::Compute(fn_name, create_node(fn_def, symbol_list, call_args))
         }
         Fn (fn_name, params, rhs) => {
+            // match params with args
+            let bound_params = match call_args {
+                // create a list of Nodes, i.e. [Node] to represent each arg
+                Some(args) => params.zip(args).map((param, arg) => create_node(arg, symbol_list))
+                // ! create "slots"
+                None => params.map(param => create_node(param, symbol_list))
+            }
             let lowered_rhs = create_node(rhs, symbol_list)
-            // implement me, if call_args is not empty, use it instead of params
-
-            Node::Compute(fn_name, params.map(param => create_node(param, symbol_list)).append(lowered_rhs))
+            Node::Compute(fn_name, bound_params.append(lowered_rhs))
         }
         Ident (name) => create_node(symbol_list.find_symbol(name), symbol_list)
         Integer (int) => Node::Data(int)
@@ -325,8 +330,17 @@ execute: (node: Node, env: Env) -> Node {
         Compute (fn_name, args) => {
             let fn_node = env.node_list.find_node(fn_name)
             match fn_node {
-                Compute (fn_name, params_and_rhs) => {
-                    // implement me
+                Compute (_, params_and_rhs) => {
+                    let (params, rhs) = params_and_rhs.split_at(args.len())
+                    if args.len() == params.len() {
+                        let new_env = Env {
+                            symbol_list: env.symbol_list.extend(params, args),
+                            node_list: env.node_list
+                        }
+                        execute(rhs[0], new_env)
+                    } else {
+                        Node::Compute(fn_name, args)
+                    }
                 }
                 _ => panic("Function name not found.")
             }
