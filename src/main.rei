@@ -286,39 +286,44 @@ SymbolList: [(String, Symbol)]
 create_node: (symbol: Symbol, symbol_list: SymbolList) -> Node {
     match symbol {
         Call (fn_name, args) => {
-            // recursively lower the fn it is calling/pointing to
             let fn_def: Fn = symbol_list.find_symbol(fn_name)
-            // pass args onto params
-
+            let arg_nodes = args.map(arg => create_node(arg, symbol_list))
+            Node::Compute(fn_name, arg_nodes)
         }
         Fn (fn_name, params, rhs) => {
-            // Node::Compute(fn_name)
+            Node::Fn(fn_name, params, rhs)
         }
-        // usually a constant like MAX_INT: 2e64
-        Ident (name) => create_node(symbol_list.find_symbol(name))
+        Ident (name) => create_node(symbol_list.find_symbol(name), symbol_list)
         Integer (int) => Node::Data(int)
     }
 }
 
 Node: enum {
     Data: Int
-    Compute
+    Compute: (String, Vec<Node>)
+    Fn: (String, Vec<String>, Symbol)
 }
 
 NodeList: [(String, Node)]
 
-execute: (node: Node, node_list = NodeList) -> Node {
+execute: (node: Node, node_list: NodeList) -> Node {
     match node {
-        Compute (fn_name) => {
-            // if partially evaluated, just return another compute
-
-            /*
-            Idea:
-                recursively execute the rhs until you reach a primitive op
-                if args complete, would be able to reduce Compute to Data
-                if not, would just return that
-            */
+        Compute (fn_name, args) => {
+            let fn_node = node_list.find_node(fn_name)
+            match fn_node {
+                Fn (_, params, rhs) => {
+                    if args.len() == params.len() {
+                        let symbol_list = SymbolList::from_nodes(params, args)
+                        let lowered_rhs = create_node(rhs, symbol_list)
+                        execute(lowered_rhs, node_list)
+                    } else {
+                        Node::Compute(fn_name, args)
+                    }
+                }
+                _ => panic!("Function name not found.")
+            }
         }
-        Data (data) => data
+        Data (data) => Node::Data(data)
+        _ => panic!("Cannot execute Fn node directly.")
     }
 }
