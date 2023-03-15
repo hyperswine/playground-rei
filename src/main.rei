@@ -280,3 +280,45 @@ resolve_ident: (String) -> Integer => symbols.first(symbol => match {
     Ident (i) => true
     _ => false
 })
+
+SymbolList: [(String, Symbol)]
+
+create_node: (symbol: Symbol, symbol_list: SymbolList) -> Node {
+    match symbol {
+        Call (fn_name, args) => {
+            // recursively lower the fn it is calling/pointing to
+            let fn_def: Fn = symbol_list.find_symbol(fn_name)
+            // pass args onto params
+
+        }
+        Fn (fn_name, params, rhs) => {
+            // Node::Compute(fn_name)
+        }
+        // usually a constant like MAX_INT: 2e64
+        Ident (name) => create_node(symbol_list.find_symbol(name))
+        Integer (int) => Node::Data(int)
+    }
+}
+
+Node: enum {
+    Data: Int
+    Compute
+}
+
+NodeList: [(String, Node)]
+
+execute: (node: Node, node_list = NodeList) -> Node {
+    match node {
+        Compute (fn_name) => {
+            // if partially evaluated, just return another compute
+
+            /*
+            Idea:
+                recursively execute the rhs until you reach a primitive op
+                if args complete, would be able to reduce Compute to Data
+                if not, would just return that
+            */
+        }
+        Data (data) => data
+    }
+}
