@@ -193,6 +193,14 @@ Rhs: extend {
 
         }
     }
+
+    do: (self, s: String) => match self {
+        Integer _ => false
+        Ident i => s == i
+        Call (name, args) => {
+            args.map(i => s.do(i))
+        }
+    }
 }
 
 Ident: String
@@ -203,12 +211,26 @@ Call: {
 }
 
 // name: (params*) => rhs*
-lower_fn_def: (name: String, params: [String], rhs: Rhs) {
+lower_fn_def: (node_list: _, name: String, params: [String], rhs: Rhs) {
     match rhs {
         Integer (i) => i,
         Ident (i) => i,
-        Call (name, args) => {
-            params.filter(p in args)
-        } 
+        Call (name, args) {
+            // params.filter(p in args)
+            params.map(p => args.do(p))
+        }
+    }
+}
+
+primitive_node_list: [
+    Node("add"),
+    Node("sub")
+]
+
+eval: (node_list: _, expr: _) -> Int {
+    match expr {
+        Call (name, args) {
+            node_list.find(name).compute(args)
+        }
     }
 }
