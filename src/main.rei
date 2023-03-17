@@ -285,24 +285,33 @@ resolve_ident: (String) -> Integer => symbols.first(symbol => match {
 
 SymbolList: [(String, Symbol)]
 
+SymbolList: [(String, Symbol)]
+
+// Create a node from a symbol
 create_node: (symbol: Symbol, symbol_list: SymbolList, call_args: [Symbol]?) -> Node {
     match symbol {
+        // For Call symbols, find the corresponding function definition
+        // and create a Compute node with the function name and its arguments
         Call (fn_name, args) => {
             let fn_def: Fn = symbol_list.find_symbol(fn_name)
-            Node::Compute(fn_name, create_node(fn_def, symbol_list, call_args))
+            Node::Compute(fn_name, create_node(fn_def, symbol_list, args))
         }
+        // For Fn symbols, create a Compute node with the function name
+        // and the lowered right-hand side expression, while also considering
+        // the passed call_args (if any)
         Fn (fn_name, params, rhs) => {
-            // match params with args
             let bound_params = match call_args {
-                // create a list of Nodes, i.e. [Node] to represent each arg
-                Some(args) => params.zip(args).map((param, arg) => create_node(arg, symbol_list))
-                // ! create "slots"
-                None => params.map(param => create_node(param, symbol_list))
+                Some(args) => params.zip(args).map((param, arg) => create_node(arg, symbol_list)),
+                // Use ParamSlot for unbound parameters
+                None => params.map(param => Node::ParamSlot(param))
             }
             let lowered_rhs = create_node(rhs, symbol_list)
             Node::Compute(fn_name, bound_params.append(lowered_rhs))
         }
+        // For Ident symbols, find the corresponding symbol in the symbol list
+        // and create a node for it
         Ident (name) => create_node(symbol_list.find_symbol(name), symbol_list)
+        // For Integer symbols, create a Data node with the integer value
         Integer (int) => Node::Data(int)
     }
 }
@@ -310,6 +319,7 @@ create_node: (symbol: Symbol, symbol_list: SymbolList, call_args: [Symbol]?) -> 
 Node: enum {
     Data: Int
     Compute: (String, Vec<Node>)
+    ParamSlot: String // Add a new variant for unbound parameter slots
 }
 
 NodeList: [(String, Node)]
@@ -348,3 +358,11 @@ execute: (node: Node, env: Env) -> Node {
         Data (data) => Node::Data(data)
     }
 }
+
+/*
+    f: (g: () -> ()) => g()
+
+    f: (g: () -> ()) => h(g)
+
+    h: (g: () -> ()) => g()
+*/
