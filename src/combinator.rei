@@ -15,3 +15,27 @@ let c = choice(a, b)
 maybe(c)
 
 // thats basically how you have to do it
+
+/*
+    keywords?
+*/
+
+Keyword: enum {
+    Do ("do")
+    While ("while")
+    _
+}
+
+Keyword: extend Self {
+    // another way?
+    match: (input) => match {
+        "do" => Do
+    }
+}
+
+keyword: (input) => Keyword::match (input)
+
+// as a "parser"
+
+// what about "tokeniser"?
+// "declarative"
