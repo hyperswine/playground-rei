@@ -39,3 +39,15 @@ keyword: (input) => Keyword::match (input)
 
 // what about "tokeniser"?
 // "declarative"
+
+/*
+    megaparsec version
+*/
+
+Keyword: Do | While | _
+
+keyword: (input: String) -> Parser[Keyword?] => match {
+    "do" => Do
+    "while" => While
+    _ => ()
+}
