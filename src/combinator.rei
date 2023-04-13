@@ -51,3 +51,8 @@ keyword: (input: String) -> Parser[Keyword?] => match {
     "while" => While
     _ => ()
 }
+
+Grammar: {
+    Expr : FnExpr | LetExpr
+    FnExpr : Grammar(_: "fn" ident: Ident "(" params: Param* ")")
+}
