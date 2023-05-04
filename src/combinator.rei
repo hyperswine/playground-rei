@@ -21,16 +21,16 @@ maybe(c)
 */
 
 Keyword: enum {
-    Do ("do")
-    While ("while")
-    _
+  Do ("do")
+  While ("while")
+  _
 }
 
 Keyword: extend Self {
-    // another way?
-    match: (input) => match {
-        "do" => Do
-    }
+  // another way?
+  match: (input) => match {
+    "do" => Do
+  }
 }
 
 keyword: (input) => Keyword::match (input)
@@ -53,6 +53,28 @@ keyword: (input: String) -> Parser[Keyword?] => match {
 }
 
 Grammar: {
-    Expr : FnExpr | LetExpr
-    FnExpr : Grammar(_: "fn" ident: Ident "(" params: Param* ")")
+  Expr : FnExpr | LetExpr
+  FnExpr : Grammar(_: "fn" ident: Ident "(" params: Param* ")")
+}
+
+/*
+    evaluating hierarchical structures
+*/
+
+Expr: NodeType1 | NodeType2 | NodeType3
+
+// extend Expr with another variant
+NodeType4: variant Expr {
+  impl Extract() => true
+}
+
+// custom logic to match for nodes at specific conditions
+
+NodeType1: impl Extract(a1, a2, a3) => a1 & a2 & a3
+NodeType2: impl Extract(a2) => a2 == 0
+
+// decompose an expr
+let expr = NodeType1(NodeType2(), NodeType3([1, 2, 3]))
+decompose: (expr: Expr) => match {
+  NodeType1
 }
