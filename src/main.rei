@@ -359,6 +359,13 @@ execute: (node: Node, env: Env) -> Node {
     }
 }
 
+execute: (env) => (fn_name) => .node_list.find_node =>
+    match {
+        Compute/2 => split_at => select Env => execute
+        _ => panic "Function name not found."
+    }
+
+
 /*
     f: (g: () -> ()) => g()
 
