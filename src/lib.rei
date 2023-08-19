@@ -3,22 +3,20 @@
 // Get started: Add a module with name api with mkdir src/api
 // And add a mod.rei file to it. Watch it Rein
 
-ExecutionTask[Ret]: {
+ExecutionTask: {
+    Ret: Type
     value: Ret?
     name: String
     task: [Any] -> Ret
 }
 
-execute (args, task: ExecutionTask[Ret]): task.task(args)
-
-
+execute (args, task: ExecutionTask): task.task(args)
 
 GraphicsData: {
     width: Int
     height: Int
     title: String
 }
-
 
 // Layout: Box Box Box
 Flex (direction, children...) -> Element: _

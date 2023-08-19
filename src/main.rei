@@ -1,4 +1,4 @@
-main: () => ()
+main: () = ()
 
 // node based execution
 
@@ -7,7 +7,7 @@ Node: Compute | Data
 Compute: [Instruction]
 
 Compute: extend {
-    (self) => self.map(ins => ins())
+    (self) = self.map(ins => ins())
 }
 
 Instruction: Dest
