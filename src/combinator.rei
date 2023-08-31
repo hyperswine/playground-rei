@@ -8,6 +8,11 @@ Parser: (f: Parser) -> (Parser, Token) => _
 
 // that means the API
 
+// a: 1
+// this would conflict with the let binding, and would usually raise an error in meta 2
+// but in meta 1, the latest definition wins
+// with rei scripting, you use meta 1
+
 let a = choice(a, b)
 let b = maybe(c)
 let c = choice(a, b)
@@ -20,18 +25,16 @@ maybe(c)
     keywords?
 */
 
-Keyword: enum {
+Keyword: enum
   Do ("do")
   While ("while")
   _
-}
 
-Keyword: extend Self {
+
+Keyword: extend Self
   // another way?
-  match: (input) => match {
+  match: (input) => match
     "do" => Do
-  }
-}
 
 keyword: (input) => Keyword::match (input)
 
@@ -46,16 +49,14 @@ keyword: (input) => Keyword::match (input)
 
 Keyword: Do | While | _
 
-keyword: (input: String) -> Parser[Keyword?] => match {
-    "do" => Do
-    "while" => While
-    _ => ()
-}
+keyword: (input: String) -> Parser[Keyword?] => match
+  "do" => Do
+  "while" => While
+  _ => ()
 
-Grammar: {
+Grammar:
   Expr : FnExpr | LetExpr
   FnExpr : Grammar(_: "fn" ident: Ident "(" params: Param* ")")
-}
 
 /*
     evaluating hierarchical structures
@@ -64,17 +65,18 @@ Grammar: {
 Expr: NodeType1 | NodeType2 | NodeType3
 
 // extend Expr with another variant
-NodeType4: variant Expr {
+NodeType4: variant Expr
   impl Extract() => true
-}
 
 // custom logic to match for nodes at specific conditions
+// use all(a1, a2, a3)
 
 NodeType1: impl Extract(a1, a2, a3) => a1 & a2 & a3
-NodeType2: impl Extract(a2) => a2 == 0
+NodeType2: impl Extract(a2) => a2 = 0
 
 // decompose an expr
 let expr = NodeType1(NodeType2(), NodeType3([1, 2, 3]))
-decompose: (expr: Expr) => match {
+
+decompose: (expr: Expr) => match
   NodeType1
-}
+
