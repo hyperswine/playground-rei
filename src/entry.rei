@@ -9,13 +9,11 @@ Compute: [Instruction]
 Compute: extend
     (self) = self.map(ins => ins())
 
-
 Instruction: Dest
 
 Instruction: enum
     Binary: std::ops::Add | std::ops::Sub
     Push = storage.push
-
 
 Binary: Op, SrcAddress1, SrcAddress2, DestAddress
 Push: ValAddress, StackAddress
@@ -23,7 +21,6 @@ Copy: SrcAddress, DestAddress
 
 Instruction: extend
     // op: (self) => self
-
 
 ComputeUnit:
     memory: Memory
@@ -37,10 +34,8 @@ ComputeUnit:
         Binary (op, src1, src2, dest) => self.queue(op, self.memory(src1), self.memory(src2))
         Push (val_addr, stack_addr) => self.queue(self.memory[val_addr])
 
-
     // now a way to optimise is to assign different NUMA domains to each queue and run each in a map
     clock: () => queue_writer(self.queue, self.memory)
-
 
 Queue: [(Op, Lhs, Rhs, Dest)]
 
@@ -49,7 +44,6 @@ QueueWriter:
     (queue: Queue, memory_zone: Memory) => memory_zone[index] = compute(queue.pop())
 
     compute: (op, lhs, rhs) => op(lhs, rhs)
-
 
 /*
     when in doubt, do everything in one go
@@ -118,20 +112,15 @@ ParserRes: impl Parse
     choice: (self, parsers: Fn[String, Parser]...) -> ParserRes
         parsers.find(p => p())
 
-
-
 // then().then().is().or()
 // choice(is())
 
 Parser:
     choice: (Fn[String, Parser]) -> Parser => _
     zero_or_more: (Fn[String, Parser]) -> Parser => _
-
     then: (Fn[String, Parser]) -> Parser => _
     choice: (parsers: Fn[String, Parser]...) -> Parser
         parsers.find(p => p())
-
-
 
 Parser[r: Res]:
     choice[r: Res]: (Fn[String, Parser]) -> Parser => _
@@ -143,8 +132,6 @@ Parser[r: Res]:
         None => f
         Error => error()
 
-
-
 // so early return is a thing on my end I guess
 // we either have a dependent type or a type parameter and a param of that lOL!
 // then we can use that as a match
@@ -154,7 +141,6 @@ Parser[r: Res]:
 Parser: Fn[String, Self]
 
 // how do we call .zero_or_more()?
-
 
 // its (String) -> Parser
 // to be able to "chain"
@@ -306,7 +292,7 @@ NodeList: [(String, Node)]
 
 NodeList: extend
     find_node: (self, name: String) -> Node
-        self.find((_name, node) => name == _name)[1]
+        self.first((_, _) => name = $1)
 
 Env:
     symbol_list: SymbolList,
@@ -319,21 +305,20 @@ execute: (node: Node, env: Env) -> Node
             match fn_node
                 Compute (_, params_and_rhs) =>
                     let (params, rhs) = params_and_rhs.split_at(args.len())
-                    if args.len() == params.len()
+                    if args.len() = params.len()
                         let new_env = Env
                             symbol_list: env.symbol_list.extend(params, args),
                             node_list: env.node_list
 
                         execute(rhs[0], new_env)
-                     else
+                    else
                         Node::Compute(fn_name, args)
                 _ => panic("Function name not found.")
         Data (data) => Node::Data(data)
 
-execute: (env) => (fn_name) => .node_list.find_node =>
-    match
-        Compute/2 => split_at => select Env => execute
-        _ => panic "Function name not found."
+execute: (env) => (fn_name) => .node_list.find_node => match
+    Compute/2 => split_at => select Env => execute
+    _ => panic "Function name not found."
 
 /*
     f: (g: () -> ()) => g()
@@ -342,3 +327,5 @@ execute: (env) => (fn_name) => .node_list.find_node =>
 
     h: (g: () -> ()) => g()
 */
+
+// [] means sequence
