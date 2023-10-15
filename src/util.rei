@@ -26,7 +26,18 @@ GraphicsData:
   title: String
 
 // Layout: Box Box Box
-Flex (direction, children...) -> Element: _
+// this basically means, return a "_" or slot?
+// Flex: (direction, children...) -> Element => _
+Flex: (direction, children...) -> Element
+
+// now the issue with that Flex: (direction, children...) -> Element is that you can actually overload it too
+// and rei wont complain
+Flex: (direction) -> Element
+
+// now you have to match either one...
+
+// like map maybe
+// instead of setting a variable you could just pass a _ that does something
 
 // how to do dataflow pass?
 
@@ -85,8 +96,53 @@ Element (on_click: EffectFn)
 LayoutText: "Click Me"
 
 // the yield keyword identifies the function as a generator
-change_text () -> yield Text: "Changed!!"
+// so you can resume
+// ... prob like
+// a circular edge?
+// change_text: () => yield Text "Changed!!"
 
 Layout: FlexRow
   Text LayoutText (on_click:change_text)
 
+// it actually works with functions too, cause you are copying the local vars, kind lazily...
+change_then_resume:
+  res: change_text
+  resume res
+
+// problem is, how do things work? when you call, does that clone the caller function? but not the args
+// if you want, maybe copy semantics works too
+// or the clone command like
+
+x: y -> ??
+  x: clone y
+
+// so you have to explicitly clone
+// or define your own "cloner"
+
+Cloner: trait (T: Type) (var: T) -> T
+
+// when you do, in meta 2 std, it actually works
+// Y: impl Cloner (var: T) -> T
+
+impl Cloner (T: Y) (var: T) -> T
+  res: Y ((clone var.v) + 1) ...
+  res.v += 2
+  res
+
+// the ... syntax can probably be used this way...
+
+// hyper types
+
+// (+=): trait Infix 10 (arg1, arg2) -> T
+(+=): trait (Infix 10) (T: Type, arg1, arg2) -> ()
+
+// note -> is weak binding
+// which can create some issues lol, but not as weak as application prob
+
+// maybe if no type is specified, dont matter
+// Numeric: impl (+=) (arg1, arg2) -> T
+// just sugar... lol !!!  fuck
+
+// this will just work
+Numeric: impl (+=) (Self, arg1, arg2) -> ()
+  arg1: arg1 + arg2
