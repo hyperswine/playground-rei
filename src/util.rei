@@ -1,19 +1,28 @@
-# THIS FILE DEFINES A LIBRARY TARGET
-
-// Get started: Add a module with name api with mkdir src/api
-// And add a mod.rei file to it. Watch it Rein
-
 ExecutionTask:
   Ret: Type
   value: Ret?
   name: String
   task: [Any] -> Ret
 
-execute: (args, task: ExecutionTask) -> task.task args
+execute: (args, task: ExecutionTask) => task.task args
+// value-dependent type, execute.
+execute: (args, task: ExecutionTask {Ret:String}) => task.task args
 
+// how to do default arguments? use =
+f: (a: String="hi") -> ...
+// in this context, rei can actually figure out your not trying to check equivalence...
+
+
+// when you make this, it becomes
+/*
+  GraphicsData:
+    width: Numeric 0
+    height: Numeric 0
+    title: String ""
+*/
 GraphicsData:
-  width: Int
-  height: Int
+  width: Numeric
+  height: Numeric
   title: String
 
 // Layout: Box Box Box
