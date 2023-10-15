@@ -3,52 +3,52 @@
 // Get started: Add a module with name api with mkdir src/api
 // And add a mod.rei file to it. Watch it Rein
 
-ExecutionTask: {
-    Ret: Type
-    value: Ret?
-    name: String
-    task: [Any] -> Ret
-}
+ExecutionTask:
+  Ret: Type
+  value: Ret?
+  name: String
+  task: [Any] -> Ret
 
-execute (args, task: ExecutionTask): task.task(args)
+execute: (args, task: ExecutionTask) -> task.task args
 
-GraphicsData: {
-    width: Int
-    height: Int
-    title: String
-}
+GraphicsData:
+  width: Int
+  height: Int
+  title: String
 
 // Layout: Box Box Box
 Flex (direction, children...) -> Element: _
 
-Layout: Flex(
-    Column,
-    Text("Lorem..."),
-)
+// how to do dataflow pass?
 
-FlexRow: Flex(Row)
+Layout: Flex
+  Column
+  Text "Lorem..."
 
-Layout (text: String): FlexRow(
-    Text(text)
-)
+FlexRow: Flex (direction =Row)
+
+# in meta 2, (text: String) is a parameter pack?
+# maybe, if you want to use it like that
+Layout: (text: String) -> FlexRow
+  Text text
 
 // what about up? uhh
 // dont
 // or use a function
 
-Element (on_click, ...): _
+Element: (on_click, ...) => _
 
 // Text(on_click = set_state(x))
 
 // when the text changes or is clicked, this function is called
 // then you can do things with it I guess
-layout_text () -> Text: "Changed!!"
+layout_text: () -> Text "Changed!!"
 
-Layout (text: String): FlexRow(
-    Text(layout_text)
+Layout: (text: String) -> FlexRow
+  Text layout_text
+  Text text (on_click:layout_text)
 
-    Text(text, on_click=layout_text)
-)
+# the = binds hard?
 
 // maybe force some stuff like keyword args to be used with keywords
 // so no position when you have a default
@@ -56,17 +56,18 @@ Layout (text: String): FlexRow(
 // the equals just returns ()?
 // maybe in cells you can also echo or have on the sidebar
 
-change_text (text) -> Text: text = "Changed!!"
+// it never copies, always passes by ownership
 
-change_text () -> yield Text: "Changed!!"
+change_text: (text) -> () => (text: "Changed!!")
 
-change_text () -> Text: yield "Changed!!"
+change_text: () -> Text => yield Text "Changed!!"
+
+change_text: () -> Text => yield "Changed!!"
 
 LayoutText: "Click Me"
 
-Layout: FlexRow(
-    Text(LayoutText, on_click=change_text)
-)
+Layout: FlexRow
+  Text LayoutText (on_click:change_text)
 
 // the effect fn should be placed from the parent
 // so it could resume the parent
@@ -77,6 +78,6 @@ LayoutText: "Click Me"
 // the yield keyword identifies the function as a generator
 change_text () -> yield Text: "Changed!!"
 
-Layout: FlexRow(
-    Text(LayoutText, on_click=change_text)
-)
+Layout: FlexRow
+  Text LayoutText (on_click:change_text)
+
