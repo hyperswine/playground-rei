@@ -28,6 +28,9 @@ Pos2D: Numeric, Numeric
 
 Farm: _ _ => ()
 
+// _ y => map y
+// is how you do slotting...
+
 # to make it more obvious
 Barbarian: Unit with Attacker (hp=100)
 
