@@ -53,6 +53,17 @@ use std.3d
   or right before someone is done
   based on whether someone is there...
 
+  Result: Exists | Error
+  Result: Exists | Extinct
+
+  in meta 2 or 0, idents are auto played in contexts
+  like
+
+  Result: Exists | Error
+  Error: ...
+  that means Result.Error refers to the outer Error. Otherwise Error is just an "anonymous" variant...
+
+
 */
 
 Agent:
