@@ -10,11 +10,56 @@ use std.3d
     basically everything is reified into a core.Object
 
   problem with highly optimised... is reversibility
+  ...
+  lol just have to use original one... and write over or de-ref it ...
+
+  use the in keyword
+
+  X: attacker in Attacker
+
+  Z: extend Y
+  X: extend Y
+  Y: X | Z
+  depends where you want to extend and if you want to add more later...
+  ...
+
+
+  exists and forall are available as FOL quantification ...
+
+  matching vs default argument
+  default args must be =
+  matching is ("")
+
+  x: exists a. a => b
+  exists: replace (seqs: Seq+, (Operator "."), formula) -> Bool => ??
+
+  if x is true, then we can implement our logic
+  x: exists a. a => b
+    println x + "hi"
+
+  y: forall (a: Attacker). a.hp == 5
+    println "for some reason everyone's hp is 5"
+
+  otherwise, reference an identifier directly
+  x
+    ...
+
+  this means, if x Exists, then do the body. Otherwise skip
+  x: x
+    ...
+
+  this could be a problem if x is used later
+  in meta 2 std it does not actually keep going and will probably short circuit either on that
+  or right before someone is done
+  based on whether someone is there...
+
 */
 
-Entity:
+Agent:
   model: Model
 
+// either building or attacker perhaps
+// extend it elsewhere for more flexibility...
 Unit: extend Entity
 
 Unit:
@@ -168,3 +213,4 @@ Model: ??
   let p1 = new PlayerAttacker
   let p2 = new AIAttacker
 */
+
