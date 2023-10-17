@@ -1,6 +1,22 @@
 use meta2 # everything within this context this will be in meta2, can be done anywhere, and subcontexes will inherit...
 use std.3d
 
+/*
+  meta 2 includes an ECS by default. If you dont want it, use meta 2-s
+
+  quering:
+    any thing can be queried. Any type basically, and instantiation of types
+    everything is a "object", but not necessarily the way you think
+    basically everything is reified into a core.Object
+
+  problem with highly optimised... is reversibility
+*/
+
+Entity:
+  model: Model
+
+Unit: extend Entity
+
 Unit:
   name: String?
   hp: Numeric
@@ -85,7 +101,7 @@ act: (unit: Unit, action: Action) -> ??
           attacker: unit as Attacker
           in
             act unit RemoveFortify
-    
+
     // ensure unit is an attacker through match semantics ...??
     // Fortify attacker
     // amount can be a function or numeric
@@ -104,3 +120,48 @@ act: (unit: Unit, action: Action) -> ??
 
     RemoveFortify
       act unit (Fortify 0)
+
+// GRAPHIC
+
+Model: ??
+
+
+/*
+  so i just had this thought thing...
+
+  like you dont have toi couple it directly
+  with a certain type of component, but
+  just a component, like a list
+  or map
+
+  maybe a hypothetical programming language with a builtin ECS might look something similar to python with dynamic types but also have a way to auto compose components
+
+  component Velocity: int, int, int
+  component Hp: int
+  component Attack: int
+
+  component Attacker: Attack + Velocity + Hp
+
+  component PendingInput
+  component PendingDamage: PendingInput
+
+  component PlayerAttacker: Attacker
+  component AIAttacker: Attacker
+
+  system Player: PlayerAttacker
+    for entity: PlayerAttacker
+      match process input
+        Attack enemy => attack enemy (entity.attack)
+
+  system AI: AIAttacker
+    for entity: AIAttacker
+      if found enemy: Enemy
+        attack enemy (entity.attack)
+
+  system DamageCalculation: Attacker
+    for entity: Attacker
+      entity.Hp -= PendingDamage entity
+
+  let p1 = new PlayerAttacker
+  let p2 = new AIAttacker
+*/
