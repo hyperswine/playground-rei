@@ -75,8 +75,16 @@ Unit: extend Entity
 
 Unit:
   name: String?
-  hp: Numeric
+  hp: Numeric 100
   Pos2D # cool thing with rei is that you can directly reference it
+
+// = could also be overloaded right? and have priorities?
+
+// either use := or just specify it directly...
+// what if refinement??
+f: (x: Int 20) -> Int
+String2: String where !"String"
+f: (y: String != "String") -> ??
 
 Attacker: extend Unit
 
@@ -85,9 +93,16 @@ Building: extend Unit
 
 # a farm is a certain type of building, but doesnt have to be its own type, just an instance
 # you could also like... just do extend...
-Farm: Building "farm" (hp=100)
+Farm: Improvement "farm"
+
+Improvement: ??
 
 Farm: extend Model
+
+Builder: Unit "builder"
+
+BuilderActions: enum
+  Build: Improvement
 
 println Farm // should print (Object : Building, Model)
 
@@ -103,7 +118,7 @@ Farm: _ _ => ()
 // _ y => map y
 // is how you do slotting...
 
-# to make it more obvious
+# to make it more obvious. Should already be 100
 Barbarian: Unit with Attacker (hp=100)
 
 Map: ()
@@ -225,3 +240,18 @@ Model: ??
   let p2 = new AIAttacker
 */
 
+// GAME OBJECTS HAVE A POSITION ON THE SCREEEEEEEN!!!
+
+GameObject: ??
+
+// how to run game? well might be good if there is an entry point specified ...
+
+// basically runs the Start
+Start: GameStart
+
+GameStart: LoadingScreen
+LoadingScreen:
+  Animation
+  Menu
+
+// done!!
