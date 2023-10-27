@@ -197,8 +197,35 @@ act: (unit: Unit, action: Action) -> ??
 
 // GRAPHIC
 
+UIPos: Pos2D
+
+UserEvent: enum
+  LeftClick: UIPos
+  RightClick: UIPos
+  SpaceBar
+  Key: std.io.Key
+
+// PanCamera:
+pan_camera: (pos: Position) -> ()
+  direction: pos within pan_zones in
+    move_camera direction
+
+# how to bind handler? either do it manually at call site or at some context like this
+handle_user: catch (event: UserEvent) -> ??
+  match event
+    LeftClick pos => ??
+    RightClick pos => ??
+    // could set off animations or pan camera when mouse moves to certain zones near the top, left, right, down zones
+    MouseMovement pos
+      pan_camera pos
+
 Model: ??
 
+Pos3D: [Numeric; 3]
+
+// can zoom in as well, z axis
+PlayerCamera:
+  coords3d: Pos3D
 
 /*
   so i just had this thought thing...
