@@ -77,6 +77,23 @@ Structure: enum
 
 program: clause*
 
+seq-parse: ?? -> Structure
+// basically, it takes a list of metaobjects and tries to find the <$> X to map or maybe the =>
+// or just considers the last expression to be the return value
+
+// i think its illegal to use head: and body: outside of the scope
+// so use a mapper
+// or return the Structure at the end of seq-parse using fmap
+/*
+clause: String -> Structure
+  seq-parse
+    head: head
+    Definition
+    body: body
+    Period
+    <$> Structure.Clause head body
+*/
+
 clause: String -> Structure
   seq-parse
     head: head
