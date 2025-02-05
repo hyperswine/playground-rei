@@ -32,6 +32,8 @@ view Model =>
     [ h2 [] [ text "Random Quotes" ]
       viewquote Model ]
 
+// so thing to get used to is that some funcs can return divs or coarser things
+// and can be composed with things above
 viewquote failure => div []\
   [ text "I could not load a quote"
     button [onclick moreplease] [ text "Try Again" ]]
