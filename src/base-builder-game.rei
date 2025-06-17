@@ -34,14 +34,24 @@ Entity:
   Shv = Shoveler
 
   // selection function for raycasts, what happens when you click on them
-  select (BaseScene scene) (Hatcher available-units) = available-units
-  select (BaseScene scene) (ResearchFacility available-upgrades) = available-upgrades
+  select BaseScene (Hatcher available-units) = InHatcheryView available-units
+  select BaseScene (ResearchFacility available-upgrades) = InResearchView available-upgrades
   ...
 
-  // upgrade {unit: Spikey, level: lvl, speed: spd, attack: atk, hitpoints: hp} = {unit: Spikey, level: lvl+1, spd + 2, atk +4}
-  upgrade {Spk, lvl, spd, atk, hitpoints: hp} = {Spk, lvl+1, spd + 2, atk + 4, hp + 1}
-  upgrade {Shv, lvl, spd, atk, hitpoints: hp} = {Shv, lvl+1, spd + 10, atk + 5, hp + 100}
-  upgrade {Car, lvl, spd, atk, hitpoints: hp} = {Car, lvl+1, spd + 50, atk + 10, hp + 200}
+  upgrade : {Unit, Level, Attack, Hp | r} -> {Unit, Level, Attack, Hp | r}
+  upgrade {Spk, lvl, spd, atk, hp} = {Spk, lvl+1, spd + 2, atk + 4, hp + 1}
+  upgrade {Shv, lvl, spd, atk, hp} = {Shv, lvl+1, spd + 10, atk + 5, hp + 100}
+  upgrade {Car, lvl, spd, atk, hp} = {Car, lvl+1, spd + 50, atk + 10, hp + 200}
+
+  Model =
+  | BaseScene
+  | InHatcheryView HatcheryId
+  | InResearchView ResearchFacilityId
+  | InUnitSelected UnitId
+  | MapView
+  | AttackView
+  | SettingsView
+  | MainMenu
 
 Graphic:
   use std.graphics.raycast
@@ -57,7 +67,16 @@ Graphic:
 
   view : Model → Frame
   view {BaseScene, buildings@[Hatcher posx posy ...], Camera rot pos} =
-    map-m_ render buildings empty-frame |> render-frustum Camera rot pos
+    fold-m render buildings empty-frame |> render-frustum Camera rot pos
+
+  view {InResearchView, available-upgrades, buildings@[Hatcher posx posy ...], camera@Camera rot pos} =
+    view {BaseScene, buildings, camera} |> modal [padding 4, rounded = 4] [ grid-view [] available-upgrades ]
+
+  grid-view attrs {title, body, image} =
+    card [] [title, body, image]
+
+  // has exit button to exit the view (which in InResearchView should go back to BaseScene like select X InResearch = BaseView)
+  modal attrs body = ...
 
 UnitBehavior:
 
@@ -94,7 +113,7 @@ Animation:
 
 SceneView:
 
-  view (BaseScene scene) =
-    map-m_ draw-entity scene.units empty-frame
-    |> map-m_ draw-building scene.buildings
+  view BaseScene =
+    fold-m draw-entity scene.units empty-frame
+    |> fold-m draw-building scene.buildings
     |> render-frustum scene.camera.rot scene.camera.pos
