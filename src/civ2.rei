@@ -57,4 +57,48 @@ Graphic:
 
   view : Model -> Frame
   view {BaseScene, buildings@[Hatcher posx posy ...], Camera rot pos} =
-    mapM_ render buildings empty-frame |> render-frustum Camera rot pos
+    map-m_ render buildings empty-frame |> render-frustum Camera rot pos
+
+UnitBehavior:
+
+  move unit@(Spk | Shv | Car) dir =
+    let accel = directionToVector dir × unit.speed
+        vel = integrate accel
+        pos = integrate vel
+    in { unit with pos }
+
+  attack unit@(Spk | Shv | Car) target =
+    if inRange unit target then
+      Cmd.Attack target.id
+    else
+      Cmd.MoveTo target.pos
+
+Upgrades:
+
+  can-upgrade {unit, lvl} = lvl < max-level unit
+  max-level Spk = 5
+  max-level Shv = 4
+  max-level Car = 3
+
+  upgrade-available u = can-upgrade u ? Some (upgrade u) ; None
+
+Animation:
+
+  use gltf.load
+
+  animation Spk = play "spike-pulse" loop
+  animation Shv = play "dig" loop
+  animation Car = play "roll" loop
+  animation Tree = clip "leaf-wind" scaled by wind-strength
+
+  wind-strength = sin (time × 2π / 10)
+
+  animate unit = animation unit
+  animate tree = animation Tree
+
+SceneView:
+
+  view (BaseScene scene) =
+    map-m_ draw-entity scene.units empty-frame
+    |> map-m_ draw-building scene.buildings
+    |> render-frustum scene.camera.rot scene.camera.pos
