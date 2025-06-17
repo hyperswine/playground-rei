@@ -17,7 +17,7 @@ InputPhysics:
 
   integrate dt val dval = val + dt × dval
 
-DoStuff:
+Entity:
 
   Hostility: Player | Enemy | AI
 
@@ -52,26 +52,24 @@ Graphic:
   Mesh: (List Vertex) (List Texture)
   Entity: { id: Id, mesh: Mesh }
 
-  raycast-select : Scene -> List Entity
+  raycast-select : Scene → List Entity
   raycast-select scene = raycast scene
 
-  view : Model -> Frame
+  view : Model → Frame
   view {BaseScene, buildings@[Hatcher posx posy ...], Camera rot pos} =
     map-m_ render buildings empty-frame |> render-frustum Camera rot pos
 
 UnitBehavior:
 
+  dtv = direction-to-vector
+
   move unit@(Spk | Shv | Car) dir =
-    let accel = directionToVector dir × unit.speed
+    let accel = dtv $ dir × unit.speed
         vel = integrate accel
         pos = integrate vel
     in { unit with pos }
 
-  attack unit@(Spk | Shv | Car) target =
-    if inRange unit target then
-      Cmd.Attack target.id
-    else
-      Cmd.MoveTo target.pos
+  attack unit@(Spk | Shv | Car) target = inrange unit target ? Cmd.Attack target.id ; Cmd.MoveTo target.pos
 
 Upgrades:
 
@@ -83,7 +81,6 @@ Upgrades:
   upgrade-available u = can-upgrade u ? Some (upgrade u) ; None
 
 Animation:
-
   use gltf.load
 
   animation Spk = play "spike-pulse" loop
@@ -93,8 +90,7 @@ Animation:
 
   wind-strength = sin (time × 2π / 10)
 
-  animate unit = animation unit
-  animate tree = animation Tree
+  animate = animation
 
 SceneView:
 
