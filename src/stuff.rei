@@ -41,3 +41,6 @@ main = vstack Examples.notes.
 
 # renders it in wahtever context, like in an IDE, will show simple PNG, if in terminal shows simple TUI or ascii art
 >> render main.
+
+// greater than is defined as greaterthan x y = y > x. If you want you can do swap greaterthan to do x > y
+> = greaterthan.
