@@ -54,10 +54,15 @@ classDiagram
         +getSubtotal()
     }
 
+```
+
+So this
+
     User ||--o{ Order : places
     Order ||--o{ OrderItem : contains
     Product ||--o{ OrderItem : references
-```
+
+does not work
 
 ## Flowchart - Code Review Process
 ```mermaid
@@ -148,11 +153,29 @@ erDiagram
     POST }o--o{ TAG : tagged_with
 ```
 
-## Gantt Chart - Project Timeline
+## Gantt Chart - Project Timeline (Fixed Overlapping)
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#ff6b6b',
+    'primaryTextColor': '#333',
+    'primaryBorderColor': '#ff6b6b',
+    'lineColor': '#333',
+    'axisTextColor': '#333'
+  },
+  'gantt': {
+    'leftPadding': 100,
+    'gridLineStartPadding': 350,
+    'fontSize': 12,
+    'sectionFontSize': 14
+  }
+}}%%
 gantt
     title Software Development Project
     dateFormat  YYYY-MM-DD
+    axisFormat  %m/%d
+
     section Planning
     Requirements Analysis    :done, req, 2024-01-01, 2024-01-15
     System Design          :done, design, 2024-01-10, 2024-01-25
@@ -170,6 +193,27 @@ gantt
     section Deployment
     Production Setup       :prod-setup, 2024-04-01, 2024-04-15
     Go Live               :milestone, 2024-04-15, 0d
+```
+
+## Alternative Gantt Chart - Weekly Format
+```mermaid
+gantt
+    title Software Development Project (Weekly View)
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %d
+
+    section Phase 1
+    Planning & Design       :done, phase1, 2024-01-01, 3w
+
+    section Phase 2
+    Backend Development     :active, phase2, 2024-01-22, 7w
+    Frontend Development    :phase2b, 2024-02-05, 6w
+
+    section Phase 3
+    Testing & QA           :phase3, 2024-03-11, 4w
+
+    section Phase 4
+    Deployment             :phase4, 2024-04-08, 1w
 ```
 
 ## Git Graph - Feature Branch Flow
@@ -218,4 +262,49 @@ journey
       Receive confirmation : 5: Customer
       Track shipment       : 4: Customer
       Receive product      : 5: Customer
+```
+
+```mermaid
+    C4Context
+      title System Context diagram for Internet Banking System
+      Enterprise_Boundary(b0, "BankBoundary0") {
+        Person(customerA, "Banking Customer A", "A customer of the bank, with personal bank accounts.")
+        Person(customerB, "Banking Customer B")
+        Person_Ext(customerC, "Banking Customer C", "desc")
+
+        Person(customerD, "Banking Customer D", "A customer of the bank, <br/> with personal bank accounts.")
+
+        System(SystemAA, "Internet Banking System", "Allows customers to view information about their bank accounts, and make payments.")
+
+        Enterprise_Boundary(b1, "BankBoundary") {
+
+          SystemDb_Ext(SystemE, "Mainframe Banking System", "Stores all of the core banking information about customers, accounts, transactions, etc.")
+
+          System_Boundary(b2, "BankBoundary2") {
+            System(SystemA, "Banking System A")
+            System(SystemB, "Banking System B", "A system of the bank, with personal bank accounts. next line.")
+          }
+
+          System_Ext(SystemC, "E-mail system", "The internal Microsoft Exchange e-mail system.")
+          SystemDb(SystemD, "Banking System D Database", "A system of the bank, with personal bank accounts.")
+
+          Boundary(b3, "BankBoundary3", "boundary") {
+            SystemQueue(SystemF, "Banking System F Queue", "A system of the bank.")
+            SystemQueue_Ext(SystemG, "Banking System G Queue", "A system of the bank, with personal bank accounts.")
+          }
+        }
+      }
+
+      BiRel(customerA, SystemAA, "Uses")
+      BiRel(SystemAA, SystemE, "Uses")
+      Rel(SystemAA, SystemC, "Sends e-mails", "SMTP")
+      Rel(SystemC, customerA, "Sends e-mails to")
+
+      UpdateElementStyle(customerA, $fontColor="red", $bgColor="grey", $borderColor="red")
+      UpdateRelStyle(customerA, SystemAA, $textColor="blue", $lineColor="blue", $offsetX="5")
+      UpdateRelStyle(SystemAA, SystemE, $textColor="blue", $lineColor="blue", $offsetY="-10")
+      UpdateRelStyle(SystemAA, SystemC, $textColor="blue", $lineColor="blue", $offsetY="-40", $offsetX="-50")
+      UpdateRelStyle(SystemC, customerA, $textColor="red", $lineColor="red", $offsetX="-50", $offsetY="20")
+
+      UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
