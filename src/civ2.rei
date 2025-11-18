@@ -15,6 +15,7 @@ interact = ??
 
 Logic.2:
 
+# declare as meaningful tags
 food.
 iron.
 
@@ -27,18 +28,26 @@ driver.
 
 UILogic.2:
 
-interact [unit, Unit] [tile, Tile] =
-  U = unit-on-tile tile,
+interact Unit Tile Game =
+  U = unit-on-tile Tile Game,
   match U with
     I? -> attack Unit I,
-    none -> move Unit Tile.
+    none -> move Unit Tile
+  end.
 
 Logic.3:
-
-# build [builder, Builder] hq [tile, Tile] [tiles, Tiles] | tile-empty Tile Tiles = insert [hq, player-id, Tile] Tiles.
 
 game.
 spec game = [player-id, ??].
 
-spec build = [builder, hq, tile, game] -> game.
-build Builder hq Tile Game | tile-empty Tile Tiles = replace [hp, player-id, Tile] Game.
+spec build = [builder, building, tile, game] -> game.
+
+# build Builder hq Tile Game | tile-empty Tile Tiles = tile-replace [hp, player-id, hq] Tile Game.
+# build Builder farm Tile Game | tile-empty Tile Tiles = tile-replace [hp, player-id, farm] Tile Game.
+
+# farms can only be built on grassland
+build Builder farm Tile Game | tile-empty Tile Tiles, tile-thing Tile ≡ grassland = Ok $ tile-replace [hp, player-id, farm] Tile Game.
+                             | otherwise = none.
+
+# for standard buildings
+build Builder Building Tile Game | tile-empty Tile Tiles = tile-replace [hp, player-id, Building] Tile Game.
